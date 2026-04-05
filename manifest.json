@@ -3,7 +3,7 @@
   "name": "SlopDimmer",
   "version": "0.1.0",
   "description": "Dims low-information filler text so you can see what actually matters. Runs locally — nothing leaves your machine.",
-  "permissions": ["activeTab", "storage", "offscreen", "scripting"],
+  "permissions": ["activeTab", "offscreen", "scripting"],
   "action": {
     "default_popup": "src/popup.html",
     "default_icon": {
@@ -24,12 +24,6 @@
     "service_worker": "src/background.js",
     "type": "module"
   },
-  "web_accessible_resources": [
-    {
-      "resources": ["src/worker.js", "src/scorer.js", "src/filler.js"],
-      "matches": ["<all_urls>"]
-    }
-  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
   },

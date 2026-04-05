@@ -642,7 +642,7 @@ function isListItem(sentence) {
   return /^\d+[\.\)]\s/.test(sentence.trim()) || /^[-*]\s/.test(sentence.trim());
 }
 
-export function scoreSentences(sentences, sentenceEmbeddings, fillerEmbeddings, titleEmbedding) {
+export function scoreSentences(sentences, sentenceEmbeddings, fillerEmbeddings) {
   if (!sentences || !sentenceEmbeddings || sentences.length !== sentenceEmbeddings.length) {
     throw new Error(`SlopDimmer: mismatched inputs (${sentences?.length} sentences, ${sentenceEmbeddings?.length} embeddings)`);
   }

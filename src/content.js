@@ -9,12 +9,33 @@
   const MIN_SENTENCES = 2;
   const MIN_SENTENCE_LENGTH = 15;
 
-  // Split text into sentences
+  // Split text into sentences, preserving URLs, version numbers, and file paths.
   function splitSentences(text) {
+    // Placeholder tokens for patterns that contain periods but aren't sentence-enders
+    const placeholders = [];
+    let safe = text;
+
+    // Protect URLs
+    safe = safe.replace(/https?:\/\/\S+/g, (m) => { placeholders.push(m); return `__SDSAFE${placeholders.length - 1}__`; });
+    // Protect file paths (src/auth.js, /etc/nginx/conf.d/default.conf, etc.)
+    safe = safe.replace(/(?:~\/|\.\/|\/)?(?:[\w.-]+\/)+[\w.-]+\.\w+/g, (m) => { placeholders.push(m); return `__SDSAFE${placeholders.length - 1}__`; });
+    // Protect version numbers (v3.2.0, Python 3.12.1, etc.)
+    safe = safe.replace(/v?\d+\.\d+(?:\.\d+)+/g, (m) => { placeholders.push(m); return `__SDSAFE${placeholders.length - 1}__`; });
+    // Protect common abbreviations
+    safe = safe.replace(/\b(e\.g|i\.e|etc|vs|Dr|Mr|Mrs|Ms|Sr|Jr|Inc|Ltd|Corp|approx|dept|est|govt|misc|assn|blvd)\./gi, (m) => { placeholders.push(m); return `__SDSAFE${placeholders.length - 1}__`; });
+    // Protect decimal numbers (3.14, 0.5, 99.9%)
+    safe = safe.replace(/\d+\.\d+/g, (m) => { placeholders.push(m); return `__SDSAFE${placeholders.length - 1}__`; });
+
     // Split on sentence-ending punctuation followed by whitespace or end of string
-    const raw = text.match(/[^.!?\n]+(?:[.!?]+|$)/g) || [text];
+    const raw = safe.match(/[^.!?\n]+(?:[.!?]+|$)/g) || [safe];
+
+    // Restore placeholders and filter
     return raw
-      .map((s) => s.trim())
+      .map((s) => {
+        let restored = s.trim();
+        restored = restored.replace(/__SDSAFE(\d+)__/g, (_, idx) => placeholders[parseInt(idx)]);
+        return restored;
+      })
       .filter((s) => s.length >= MIN_SENTENCE_LENGTH);
   }
 
@@ -58,6 +79,7 @@
     const blocks = [];
     const seen = new Set();
     for (const el of containers) {
+      if (el.closest("[contenteditable]") || el.isContentEditable) continue;
       const text = el.innerText?.trim();
       if (!text || text.length < 80) continue;
       if (seen.has(text)) continue;
@@ -70,6 +92,7 @@
     if (blocks.length === 0) {
       const paragraphs = document.querySelectorAll("p, li, td, blockquote, pre");
       for (const el of paragraphs) {
+        if (el.closest("[contenteditable]") || el.isContentEditable) continue;
         const text = el.innerText?.trim();
         if (!text || text.length < 80) continue;
         if (seen.has(text)) continue;
@@ -80,16 +103,6 @@
     }
 
     return blocks;
-  }
-
-  // Get the page title or first heading for title-delta scoring
-  function getPageTitle() {
-    const heading = document.querySelector(
-      "h1, .js-issue-title, .gh-header-title, .commit-title, " +
-        '[data-testid="issue-title"], .email-subject'
-    );
-    if (heading?.innerText?.trim()) return heading.innerText.trim();
-    return document.title || "";
   }
 
   // Apply scores at the paragraph level within a container.
@@ -195,12 +208,16 @@
     window.__slopDimmerActive = false;
   }
 
-  // Main processing pipeline
-  async function activate() {
+  function activate() {
     if (window.__slopDimmerActive) {
       deactivate();
       return;
     }
+    analyze();
+  }
+
+  // Core analysis pipeline (also used by SPA observer for re-analysis)
+  async function analyze() {
     if (_processing) return;
     _processing = true;
 
@@ -223,17 +240,9 @@
 
     if (allSentences.length === 0) { _processing = false; return; }
 
-    // Get page title
-    const title = getPageTitle();
-    const textsToEmbed = [...allSentences];
-    if (title) textsToEmbed.push(title);
-
     // Request embeddings from background worker
-    const embeddings = await requestEmbeddings(textsToEmbed);
+    const embeddings = await requestEmbeddings(allSentences);
     if (!embeddings) { _processing = false; return; }
-
-    const sentenceEmbeddings = embeddings.slice(0, allSentences.length);
-    const titleEmbedding = title ? embeddings[embeddings.length - 1] : null;
 
     // Request filler embeddings
     const fillerEmbeddings = await requestFillerEmbeddings();
@@ -241,9 +250,8 @@
     // Score using imported scorer via background
     const scores = await requestScoring(
       allSentences,
-      sentenceEmbeddings,
-      fillerEmbeddings,
-      titleEmbedding
+      embeddings,
+      fillerEmbeddings
     );
 
     if (!scores) { _processing = false; return; }
@@ -275,20 +283,13 @@
   }
 
   // Communication with background service worker
-  let msgId = 0;
-  const pending = new Map();
-
   function sendMessage(msg) {
     return new Promise((resolve, reject) => {
-      const id = msgId++;
-      pending.set(id, { resolve, reject });
-      chrome.runtime.sendMessage({ ...msg, id }, (response) => {
+      chrome.runtime.sendMessage(msg, (response) => {
         if (chrome.runtime.lastError) {
-          pending.delete(id);
           reject(new Error(chrome.runtime.lastError.message));
           return;
         }
-        pending.delete(id);
         resolve(response);
       });
     });
@@ -314,14 +315,13 @@
     }
   }
 
-  async function requestScoring(sentences, sentenceEmbeddings, fillerEmbeddings, titleEmbedding) {
+  async function requestScoring(sentences, sentenceEmbeddings, fillerEmbeddings) {
     try {
       const response = await sendMessage({
         type: "score",
         sentences,
         sentenceEmbeddings,
         fillerEmbeddings,
-        titleEmbedding,
       });
       return response?.scores || null;
     } catch (err) {
@@ -353,5 +353,35 @@
       sendResponse({ active: window.__slopDimmerActive });
     }
     return true;
+  });
+
+  // SPA support: watch for significant DOM changes and re-analyze new content.
+  let spaTimer = null;
+  const observer = new MutationObserver((mutations) => {
+    if (!window.__slopDimmerActive) return;
+
+    // Only react to added nodes with enough text to matter
+    let significantChange = false;
+    for (const m of mutations) {
+      for (const node of m.addedNodes) {
+        if (node.nodeType === 1 && node.innerText?.length > 80 && !node.closest("[data-slopdimmer-processed]")) {
+          significantChange = true;
+          break;
+        }
+      }
+      if (significantChange) break;
+    }
+
+    if (significantChange) {
+      clearTimeout(spaTimer);
+      spaTimer = setTimeout(() => {
+        analyze();
+      }, 1000);
+    }
+  });
+
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
   });
 })();

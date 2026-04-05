@@ -14,8 +14,7 @@ function runTest(name, sentences, expectedSignals, options = {}) {
   const { allowNearMisses = true } = options;
   const embs = sentences.map((_, i) => fakeEmb(i * 7 + 1));
   const fillerEmbs = [fakeEmb(999)];
-  const titleEmb = fakeEmb(500);
-  const scores = scoreSentences(sentences, embs, fillerEmbs, titleEmb);
+  const scores = scoreSentences(sentences, embs, fillerEmbs);
 
   let pass = 0, fail = 0;
   const failures = [];

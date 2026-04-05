@@ -3,7 +3,8 @@
 const toggleBtn = document.getElementById("toggleBtn");
 const statsEl = document.getElementById("stats");
 const modesEl = document.getElementById("modes");
-const statusEl = document.getElementById("status");
+const spinnerEl = document.getElementById("spinner");
+const statusTextEl = document.getElementById("statusText");
 const totalEl = document.getElementById("totalSentences");
 const highEl = document.getElementById("highSignal");
 const lowEl = document.getElementById("lowSignal");
@@ -12,17 +13,23 @@ const densityPct = document.getElementById("densityPct");
 
 let isActive = false;
 
+function setStatus(text, showSpinner) {
+  statusTextEl.textContent = text;
+  if (showSpinner) {
+    spinnerEl.classList.add("visible");
+  } else {
+    spinnerEl.classList.remove("visible");
+  }
+}
+
 // Ensure the content script is injected, then send a message
 async function ensureContentScript(tabId) {
   try {
-    // Try sending a message first — if content script is already loaded, it responds
     const response = await chrome.tabs.sendMessage(tabId, { type: "get_status" });
     return response;
   } catch (e) {
-    // Content script not loaded — inject it
     await chrome.scripting.insertCSS({ target: { tabId }, files: ["styles.css"] });
     await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
-    // Give it a moment to register listeners
     await new Promise((r) => setTimeout(r, 100));
     return null;
   }
@@ -49,7 +56,7 @@ toggleBtn.addEventListener("click", async () => {
   if (!tab) return;
 
   if (!isActive) {
-    statusEl.textContent = "Loading model and analyzing...";
+    setStatus("Loading model and analyzing...", true);
     toggleBtn.disabled = true;
   }
 
@@ -58,20 +65,18 @@ toggleBtn.addEventListener("click", async () => {
     const response = await chrome.tabs.sendMessage(tab.id, { type: "toggle" });
 
     if (response?.active === "pending") {
-      // Activation started — wait for analysis_complete message
       toggleBtn.textContent = "Analyzing...";
       toggleBtn.classList.add("active");
       toggleBtn.disabled = true;
-      statusEl.textContent = "Loading model and analyzing...";
+      setStatus("Loading model and analyzing...", true);
     } else if (response?.active === false) {
-      // Deactivated
       isActive = false;
       toggleBtn.textContent = "Dim the slop";
       toggleBtn.classList.remove("active");
       toggleBtn.disabled = false;
       statsEl.classList.remove("visible");
       modesEl.classList.remove("visible");
-      statusEl.textContent = "Click to dim the slop";
+      setStatus("Click to dim the slop", false);
     } else {
       isActive = response?.active || false;
       toggleBtn.disabled = false;
@@ -79,9 +84,9 @@ toggleBtn.addEventListener("click", async () => {
   } catch (e) {
     const msg = e.message || "";
     if (msg.includes("chrome://") || msg.includes("Cannot access")) {
-      statusEl.textContent = "Can't analyze this page";
+      setStatus("Can't analyze this page", false);
     } else {
-      statusEl.textContent = "Error: " + msg;
+      setStatus("Error: " + msg, false);
     }
     toggleBtn.disabled = false;
   }
@@ -124,7 +129,7 @@ chrome.runtime.onMessage.addListener((msg) => {
 
     statsEl.classList.add("visible");
     modesEl.classList.add("visible");
-    statusEl.textContent = "Active";
+    setStatus("Active", false);
     isActive = true;
     toggleBtn.textContent = "Turn off";
     toggleBtn.classList.add("active");

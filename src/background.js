@@ -91,13 +91,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 
   if (msg.type === "score") {
-    const { sentences, sentenceEmbeddings, fillerEmbeddings, titleEmbedding } = msg;
+    const { sentences, sentenceEmbeddings, fillerEmbeddings } = msg;
     try {
       const scores = scoreSentences(
         sentences,
         sentenceEmbeddings,
-        fillerEmbeddings,
-        titleEmbedding
+        fillerEmbeddings
       );
       sendResponse({ scores });
     } catch (err) {

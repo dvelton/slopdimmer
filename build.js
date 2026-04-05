@@ -2,6 +2,20 @@ const esbuild = require("esbuild");
 const path = require("path");
 const fs = require("fs");
 
+// Patch helper: replaces a pattern and throws if it didn't match.
+// Prevents silent build breakage when upstream ONNX runtime changes.
+function patchOrFail(code, pattern, replacement, description) {
+  const patched = code.replace(pattern, replacement);
+  if (patched === code) {
+    console.error(`\n  BUILD PATCH FAILED: ${description}`);
+    console.error(`  Pattern: ${pattern}`);
+    console.error(`  This usually means the ONNX runtime or HuggingFace library was updated.`);
+    console.error(`  Check the bundled output and update the patch pattern.\n`);
+    throw new Error(`Patch failed: ${description}`);
+  }
+  return patched;
+}
+
 async function build() {
   // Clean dist
   if (fs.existsSync(path.resolve(__dirname, "dist"))) {
@@ -43,9 +57,10 @@ async function build() {
   let offscreenCode = fs.readFileSync(path.resolve(__dirname, "dist/offscreen.js"), "utf8");
 
   // 1. Replace the CDN URL fallback
-  offscreenCode = offscreenCode.replace(
+  offscreenCode = patchOrFail(offscreenCode,
     /ONNX_ENV\.wasm\.wasmPaths = `https:\/\/cdn\.jsdelivr\.net[^`]*`;/g,
-    'ONNX_ENV.wasm.wasmPaths = self.__slopdimmer_wasm_base || "./";\n'
+    'ONNX_ENV.wasm.wasmPaths = self.__slopdimmer_wasm_base || "./";\n',
+    "ONNX CDN URL replacement"
   );
 
   // 2. Replace ALL import.meta.url with extension base URL
@@ -75,19 +90,26 @@ async function build() {
     return ortWasmThreaded;
   })()`;
 
-  // 4. Replace the dynamic import function Qp with one that returns the inlined module.
-  //    Qp was: async (e) => (await import(e)).default
-  //    We replace it to return the pre-inlined WASM initializer, ignoring the URL arg.
-  offscreenCode = offscreenCode.replace(
-    /Qp = async \(e\) => \(await import\(\s*\/\*webpackIgnore:true\*\/\s*e\s*\)\)\.default/,
-    `Qp = async (e) => ${inlinedWasmInit}`
-  );
-
-  // If the above pattern didn't match (already patched by previous build), try the fetch version
-  offscreenCode = offscreenCode.replace(
-    /Qp = async \(e\) => \{\s*try \{\s*const resp[\s\S]*?SlopDimmer: WASM loader[\s\S]*?\}/,
-    `Qp = async (e) => ${inlinedWasmInit}`
-  );
+  // 4. Replace the dynamic import function with one that returns the inlined module.
+  //    The variable name may change across ONNX versions — the pattern matches the structure.
+  let patchedQp = false;
+  const qpPatterns = [
+    /\w+ = async \(e\) => \(await import\(\s*\/\*webpackIgnore:true\*\/\s*e\s*\)\)\.default/,
+    /\w+ = async \(e\) => \{\s*try \{\s*const resp[\s\S]*?SlopDimmer: WASM loader[\s\S]*?\}/,
+  ];
+  for (const pattern of qpPatterns) {
+    if (pattern.test(offscreenCode)) {
+      offscreenCode = offscreenCode.replace(pattern, `__slopdimmer_wasm_loader = async (e) => ${inlinedWasmInit}`);
+      patchedQp = true;
+      break;
+    }
+  }
+  if (!patchedQp) {
+    console.error("\n  BUILD PATCH FAILED: Could not find ONNX dynamic import function to patch.");
+    console.error("  This usually means onnxruntime-web was updated and the bundled code structure changed.");
+    console.error("  Check dist/offscreen.js for the dynamic import pattern and update build.js.\n");
+    throw new Error("Patch failed: ONNX dynamic import");
+  }
 
   // 5. Replace the hardcoded Hugging Face remote host with a local path placeholder.
   //    The actual chrome.runtime.getURL is set at runtime in offscreen.js,
