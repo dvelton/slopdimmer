@@ -1196,6 +1196,194 @@ const t61 = runTest("Empty acknowledgments vs actionable", [
 ]);
 totalPass += t61.pass; totalFail += t61.fail;
 
+// ═══════════════════════════════════════════════
+// TEST 62: Weight calibration scenarios
+// Validates the five scenarios from the calibration analysis.
+// ═══════════════════════════════════════════════
+const t62 = runTest("Weight calibration scenarios", [
+  // S1: Filler opener + concrete file path — specificity should rescue
+  "It's worth noting that the config in /etc/nginx/sites-available/default needs updating",
+  // S2: Neutral prose — no filler patterns, no specificity, should be readable (mid)
+  "The team discussed the project status in the weekly meeting this morning.",
+  // S3: Pure signal with code ref + question mark
+  "Does the JWT refresh endpoint at /api/auth/refresh validate the exp claim?",
+  // S4: Multi-filler-pattern sentence — should be very dim
+  "I believe that by implementing these changes, we can significantly enhance the security posture and provide a more robust experience for our users going forward.",
+  // S5: Filler opener + strong data payload (curl command)
+  "Great question! Try curl -X POST https://api.example.com/v2/auth -H 'Authorization: Bearer token'",
+], [
+  "high", // file path rescues the filler opener
+  "mid",  // neutral prose: readable but not highlighted
+  "high", // pure signal
+  "low",  // multi-pattern filler
+  "high", // strong specificity overrides filler pattern
+], { allowNearMisses: false });
+totalPass += t62.pass; totalFail += t62.fail;
+
+// ═══════════════════════════════════════════════
+// TEST 63: Opacity curve — visual hierarchy on a typical AI-slop GitHub issue
+// Simulates reading a full issue and verifies the dimming produces
+// the right visual hierarchy: filler dim, bug detail bright, slop conclusion dim.
+// ═══════════════════════════════════════════════
+const t63 = runTest("End-to-end visual hierarchy (GitHub issue)", [
+  // Opening paragraph: throat-clearing → very dim
+  "I wanted to bring to your attention a critical issue that I believe warrants immediate consideration.",
+  // Actual bug description with code refs → bright
+  "The JWT refresh endpoint at /api/auth/refresh accepts expired tokens without checking the exp claim.",
+  // Vacuous conclusion → dim
+  "I believe by implementing these changes we can significantly enhance the overall quality.",
+  // A reply: direct question → bright
+  "Can you share a reproduction case?",
+  // A reply: "Great question" then useful info → bright (specificity overcomes filler)
+  "That's a great point — the error only triggers when request.headers.host is undefined.",
+  // Filler transition → dim
+  "In light of the above, I believe we should take a holistic approach to addressing these concerns.",
+  // Terse, specific Slack-style reply → bright
+  "Fixed in abc123f, deployed to staging.",
+], [
+  "low",  // throat-clearing
+  "high", // specific bug detail
+  "low",  // conclusion slop
+  "high", // direct question
+  "high", // specificity overrides "great point" pattern
+  "low",  // filler transition
+  "high", // terse signal with commit hash + deploy ref
+], { allowNearMisses: false });
+totalPass += t63.pass; totalFail += t63.fail;
+
+// ═══════════════════════════════════════════════
+// TEST 64: Extensionless Unix paths detected as specificity signal
+// ═══════════════════════════════════════════════
+const t64 = runTest("Extensionless Unix paths", [
+  "Check the config at /etc/nginx/sites-available/default for the upstream block.",
+  "The daemon writes to /var/log/myapp/access and /var/log/myapp/error.",
+  "We installed the binary at /usr/local/bin/myservice after the migration.",
+  "The socket file at /run/postgresql/.s.PGSQL.5432 isn't being created.",
+], [
+  "high", "high", "high", "high",
+]);
+totalPass += t64.pass; totalFail += t64.fail;
+
+// ═══════════════════════════════════════════════════════════
+// UX REVIEW EDGE CASES (added during UX/visual design audit)
+// These tests validate scoring behavior for patterns discovered
+// during review of the popup, visual treatments, and accessibility.
+// ═══════════════════════════════════════════════════════════
+
+// TEST 65: Filler opener + high-specificity payload
+// UX issue: opacity 0.25 on "Importantly, the timeout is 5000ms in defaults.js"
+// is jarring — the technical content IS signal and should partially rescue it.
+// The adaptive damping formula lets high-specificity content override a single
+// filler opener.
+const t65 = runTest("Filler opener + high-specificity payload (UX edge case)", [
+  // Single filler word + very specific content — should score MID, not LOW
+  "Importantly, the timeout is hardcoded to 5000ms in src/config/defaults.js",
+  "It's worth noting that CVE-2024-1337 affects all versions before 3.2.5",
+  "Essentially, the bottleneck is the N+1 query in the repository.findAll() call on line 89",
+  "Notably, the migration at db/migrations/20241201_add_org_id.sql fails because the FK constraint is broken",
+  // Same opener + vague content — still LOW (only high specificity rescues)
+  "Notably, we should enhance our approach to ensure comprehensive coverage.",
+  "Importantly, this is a critical issue that affects all users going forward.",
+], [
+  "mid",   // file path + measurement rescue the filler opener
+  "high",  // CVE + version + numbers = very high specificity
+  "mid",   // function call + line number
+  "high",  // file path with date + underscore vars
+  "low",   // filler opener + zero specificity = still low
+  "low",   // filler opener + filler content = still low
+]);
+totalPass += t65.pass; totalFail += t65.fail;
+
+// TEST 66: Signal-only mode survivability
+// The signal-only mode in the popup hides all non-"high" sentences.
+// Tests what a user in signal-only mode would lose vs. keep.
+// Actionable items and concrete findings should survive; padding gets hidden.
+const t66 = runTest("Signal-only mode survivability", [
+  // These should survive (HIGH = kept in signal-only mode)
+  "Segfault in v8::ArrayBuffer when size exceeds 2GB on 32-bit builds.",
+  "Reproduce with: docker run -e NODE_ENV=test -p 3000:3000 my-image:v2.1.0",
+  "The hotfix for #8842 is in commit a3f2c9d — cherry-pick to release/4.x",
+  "curl -X DELETE /api/sessions/all returns 204 but sessions persist in Redis.",
+  // These get hidden in signal-only mode — vague, no specifics
+  "This approach has tradeoffs worth considering.",
+  "The system has been running well overall.",
+  "I think we should probably look into this at some point.",
+  "There may be an issue here.",
+], [
+  "high", "high", "high", "high",
+  "low",  // vague tradeoff without content
+  "low",  // empty positive assessment
+  "low",  // vague future action
+  "low",  // vague problem statement
+]);
+totalPass += t66.pass; totalFail += t66.fail;
+
+// TEST 67: Opacity floor — most egregious filler reliably hits minimum
+// Accessibility concern: at 0.25 opacity, text is nearly invisible for low-
+// vision users. Confirms that only the worst filler hits the floor, while
+// sentences with ANY signal stay above it.
+const t67 = runTest("Opacity floor — egregious filler hits minimum", [
+  // Full-bore AI slop — should hit opacity floor (very LOW)
+  "I've been delving into the authentication module and I wanted to bring to your attention a critical issue that I believe warrants immediate consideration.",
+  "In today's rapidly changing technology environment, maintaining robust error handling serves as a critical foundation for system reliability.",
+  "I believe that by implementing these changes we can significantly enhance the security posture of the authentication system.",
+  "Let me break this down step by step so we can all understand the full picture of what's going on here.",
+  // Has filler framing but non-zero signal — should stay above floor
+  "The real problem is the missing null check on line 42.",
+  "While I'm not certain, the cache key format changed in v3.4.0.",
+], [
+  "low", "low", "low", "low",
+  "high",  // specific line reference rescues it
+  "high",  // specific version reference (tolerance: mid ok)
+]);
+totalPass += t67.pass; totalFail += t67.fail;
+
+// TEST 68: GitHub PR/issue context signals
+// Tests content patterns specific to GitHub: PR descriptions, issue comments,
+// and code review feedback. Validates the extension works well in its most
+// important use case.
+const t68 = runTest("GitHub PR/issue content contexts", [
+  // Generic opener filler in issue/PR context
+  "This PR addresses a critical issue that has been affecting our users.",
+  "This issue was discovered during routine maintenance.",
+  "I noticed this while working on an unrelated feature.",
+  // High-signal GitHub content
+  "Affects all users running macOS 14.3+ with Node.js 20.x and SSD-backed Docker volumes.",
+  "Regression introduced in #4521 — reverting that PR fixes the issue.",
+  "The memory usage grows by ~50MB per request and never frees — confirmed via node --inspect.",
+  // Code review: generic label vs. metric
+  "This file was modified.",
+  "Code coverage: 78.4% (+0.3%)",
+], [
+  "low",  // generic PR opener
+  "low",  // generic discovery sentence
+  "low",  // meta-comment about workflow
+  "high", // specific OS + runtime + hardware
+  "high", // specific issue reference + action
+  "high", // specific metrics + tooling
+  "low",  // zero content
+  "high", // specific metric with delta
+]);
+totalPass += t68.pass; totalFail += t68.fail;
+
+// TEST 69: Negative parallelism — the "it's not X, it's Y" pattern
+// A top AI writing tell. Should score LOW since it adds no concrete information
+// (unless the Y has actual specifics).
+const t69 = runTest("Negative parallelism patterns", [
+  // Pure rhetorical inversion — no new information
+  "It's not a bug, it's a feature.",
+  "It's not about the code, it's about the culture.",
+  "This isn't just a technical issue, it's a trust issue.",
+  "It's not bold, it's backwards.",
+  "Not a bug. Not a feature. A fundamental design flaw.",
+  // Inversion with actual technical specifics — signal wins
+  "It's not the API that's slow — the database query at /api/users takes 2.3s due to a missing index on users.email.",
+], [
+  "low", "low", "low", "low", "low",
+  "high",  // specific endpoint + timing + root cause
+]);
+totalPass += t69.pass; totalFail += t69.fail;
+
 // Final summary
 console.log(`\n${"═".repeat(50)}`);
 console.log(`TOTAL: ${totalPass} passed, ${totalFail} failed out of ${totalPass + totalFail}`);
