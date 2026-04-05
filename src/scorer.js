@@ -736,23 +736,23 @@ export function scoreSentences(sentences, sentenceEmbeddings, fillerEmbeddings) 
   //   - Signal content (raw 0.6-0.8) is bright
   //   - Strong signal (raw 0.8-1.0) is near-full brightness
   //
-  // Raw score mapping:
-  //   0.0 - 0.2  → 0.15-0.25 (very dim — obvious filler)
-  //   0.2 - 0.4  → 0.25-0.40 (dim — likely filler)
-  //   0.4 - 0.6  → 0.40-0.65 (mid — neutral prose)
-  //   0.6 - 0.8  → 0.65-0.90 (bright — signal)
+  // Raw score mapping — designed for obvious visual contrast:
+  //   0.0 - 0.2  → 0.10-0.15 (nearly invisible — confirmed filler)
+  //   0.2 - 0.4  → 0.15-0.30 (clearly faded — likely filler)
+  //   0.4 - 0.6  → 0.30-0.60 (noticeably lighter — neutral)
+  //   0.6 - 0.8  → 0.60-0.90 (readable — signal)
   //   0.8 - 1.0  → 0.90-1.00 (full brightness — strong signal)
 
   return scores.map(rawScore => {
     let opacity;
     if (rawScore <= 0.2) {
-      opacity = 0.15 + (rawScore / 0.2) * 0.10;           // 0.15-0.25
+      opacity = 0.10 + (rawScore / 0.2) * 0.05;           // 0.10-0.15
     } else if (rawScore <= 0.4) {
-      opacity = 0.25 + ((rawScore - 0.2) / 0.2) * 0.15;   // 0.25-0.40
+      opacity = 0.15 + ((rawScore - 0.2) / 0.2) * 0.15;   // 0.15-0.30
     } else if (rawScore <= 0.6) {
-      opacity = 0.40 + ((rawScore - 0.4) / 0.2) * 0.25;   // 0.40-0.65
+      opacity = 0.30 + ((rawScore - 0.4) / 0.2) * 0.30;   // 0.30-0.60
     } else if (rawScore <= 0.8) {
-      opacity = 0.65 + ((rawScore - 0.6) / 0.2) * 0.25;   // 0.65-0.90
+      opacity = 0.60 + ((rawScore - 0.6) / 0.2) * 0.30;   // 0.60-0.90
     } else {
       opacity = 0.90 + ((rawScore - 0.8) / 0.2) * 0.10;   // 0.90-1.00
     }
