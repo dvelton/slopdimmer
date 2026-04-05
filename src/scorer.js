@@ -41,13 +41,16 @@ const FILLER_PATTERNS = [
 
   // Vacuous conclusions
   /i believe (that )?by implementing these/i,
-  /significantly enhance the security posture/i,
+  /significantly enhance/i,
   /provide a more robust experience/i,
   /for our users going forward/i,
   /^in conclusion/i,
   /^to sum up/i,
   /^in summary/i,
   /^moving forward/i,
+  /going forward\.?\s*$/i,
+  /robust.*experience/i,
+  /more robust developer/i,
 
   // Filler transitions
   /^with that being said/i,
@@ -103,6 +106,29 @@ const FILLER_PATTERNS = [
   // Ever-evolving landscape
   /ever-evolving (landscape|world|environment)/i,
   /in today's (rapidly changing |modern )?(environment|world|landscape)/i,
+
+  // Leverage / ensure / seamless family
+  /leverage (best practices|our|the)/i,
+  /ensure a seamless/i,
+  /seamless experience/i,
+  /more maintainable going forward/i,
+  /overall (quality|performance|reliability)/i,
+
+  // "Let me" pedagogical patterns
+  /let me break this down/i,
+  /so we can all understand/i,
+  /the full picture/i,
+
+  // Generic project filler
+  /great (progress|work|job|effort)/i,
+  /continue along these lines/i,
+  /put into making/i,
+  /effort you've put/i,
+  /well-thought-out/i,
+  /looks solid/i,
+
+  // "This is important" without saying why
+  /^this is (really )?(important|critical|crucial)\.?$/i,
 ];
 
 // Count how many filler patterns match in a sentence
@@ -119,26 +145,56 @@ function specificityScore(sentence) {
   let score = 0;
   const s = sentence.trim();
 
-  // Contains numbers
+  // Contains numbers (dates, counts, measurements, error codes, metrics)
   if (/\d{2,}/.test(s)) score += 0.2;
+
+  // Contains measurements with units (12ms, 340ms, 50K, 3.2GB, etc.)
+  if (/\d+\s*(ms|s|MB|GB|KB|TB|req|rps|qps|fps|px|%)\b/i.test(s)) score += 0.15;
 
   // Contains file paths or code references
   if (/[\/\\][\w.-]+\.\w+/.test(s) || /`[^`]+`/.test(s)) score += 0.3;
 
   // Contains URLs or API endpoints
-  if (/https?:\/\/\S+/.test(s) || /\/(api|auth|v\d)\//i.test(s)) score += 0.3;
+  if (/https?:\/\/\S+/.test(s) || /\/(api|auth|v\d|src|lib|bin)\//i.test(s)) score += 0.3;
 
-  // Contains code-like tokens
+  // Contains code-like tokens (function calls, variables with underscores/camelCase)
   if (/\w+\([\w,\s]*\)/.test(s) || /\w+_\w+/.test(s)) score += 0.25;
 
+  // Contains ALL_CAPS identifiers (env vars, constants)
+  if (/\b[A-Z][A-Z_]{2,}\b/.test(s)) score += 0.2;
+
   // Contains specific technical terms
-  if (/\b(null|undefined|NaN|404|500|401|403|200|TypeError|Error|Exception|bug|crash|CVE|JWT|token|endpoint|curl|POST|GET|PUT|DELETE)\b/i.test(s)) score += 0.2;
+  if (/\b(null|undefined|NaN|segfault|mutex|race condition|deadlock|memory leak|stack overflow)\b/i.test(s)) score += 0.2;
+  if (/\b(404|500|401|403|200|301|302|TypeError|Error|Exception|bug|crash|CVE|RFC)\b/i.test(s)) score += 0.2;
+  if (/\b(JWT|OAuth|SSL|TLS|DNS|HTTP|HTTPS|API|REST|GraphQL|SQL|NoSQL)\b/.test(s)) score += 0.15;
+  if (/\b(curl|git|npm|pip|docker|kubectl|terraform|ansible)\b/i.test(s)) score += 0.2;
+  if (/\b(token|endpoint|middleware|pipeline|migration|deploy|commit|merge|rebase)\b/i.test(s)) score += 0.1;
+
+  // Contains version numbers (v3.2.0, Python 3.12, etc.)
+  if (/v?\d+\.\d+(\.\d+)?/.test(s)) score += 0.15;
 
   // Contains quoted strings or command-line syntax
-  if (/"[^"]{3,}"/.test(s) || /\$\{/.test(s) || /^(curl|git|npm|pip|docker)\s/i.test(s)) score += 0.3;
+  if (/"[^"]{3,}"/.test(s) || /'[^']{3,}'/.test(s)) score += 0.2;
+  if (/\$\{/.test(s) || /^(curl|git|npm|pip|docker)\s/i.test(s)) score += 0.3;
 
-  // Contains specific identifiers (camelCase, snake_case)
+  // Contains specific identifiers (camelCase, snake_case, kebab-case)
   if (/[a-z][A-Z]/.test(s) && /[a-z]{2,}[A-Z]/.test(s)) score += 0.15;
+
+  // Contains issue/PR references (#1234)
+  if (/#\d{2,}/.test(s)) score += 0.2;
+
+  // Contains commit hashes
+  if (/\b[a-f0-9]{7,40}\b/.test(s)) score += 0.2;
+
+  // Contains p50/p95/p99 latency references
+  if (/p\d{2}\b/i.test(s)) score += 0.15;
+
+  // Contains date/time references
+  if (/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d/i.test(s)) score += 0.1;
+  if (/\d{1,2}(am|pm)\s*(PST|EST|UTC|PT|ET|CT)/i.test(s)) score += 0.15;
+
+  // Contains specific room/location references
+  if (/\b(Room|Building|Floor)\s+\w/i.test(s)) score += 0.1;
 
   // Short and punchy with content = very likely signal
   const words = s.split(/\s+/).length;
@@ -199,33 +255,56 @@ export function scoreSentences(sentences, sentenceEmbeddings, fillerEmbeddings, 
 
     // 5. Structural bonuses
     let structuralBonus = 0;
-    if (isDirectQuestion(sentence)) structuralBonus += 0.3;
-    if (isListItem(sentence)) structuralBonus += 0.2;
+    if (isDirectQuestion(sentence)) structuralBonus += 0.5;
+    if (isListItem(sentence)) structuralBonus += 0.3;
 
-    // Combine: start at 0.5 (neutral), add/subtract
+    // Combine: start at 0.5 (neutral), add/subtract.
+    // When filler patterns are detected, reduce the specificity boost — 
+    // a sentence like "I believe the API architecture should be enhanced" 
+    // has technical words but is still filler.
+    const dampedSpecificity = patternMatches > 0 
+      ? specificity * 0.3  // filler structure dampens technical word bonus
+      : specificity;
+
     let score = 0.5
       - patternPenalty        // filler patterns: strong penalty
       - embeddingPenalty      // embedding similarity: mild penalty
       - redundancyPenalty     // redundancy: mild penalty
-      + specificity           // concrete details: strong boost
+      + dampedSpecificity     // concrete details: boosted, but dampened if filler
       + structuralBonus;      // questions, list items: boost
 
     score = Math.max(0, Math.min(1, score));
     scores.push(score);
   }
 
-  // Normalize to use full visual range
-  const min = Math.min(...scores);
-  const max = Math.max(...scores);
-  const range = max - min;
+  // Map raw scores to opacity values.
+  // Use absolute thresholds, NOT relative normalization.
+  // This prevents all-filler pages from having some filler appear bright.
+  //
+  // Raw score mapping:
+  //   0.0 - 0.2  → 0.25 opacity (very dim)
+  //   0.2 - 0.4  → 0.25-0.45 (dim)
+  //   0.4 - 0.6  → 0.45-0.70 (mid)
+  //   0.6 - 0.8  → 0.70-0.90 (bright)
+  //   0.8 - 1.0  → 0.90-1.00 (full brightness)
+  //
+  // Then apply mild contrast stretching within the actual range to improve 
+  // visual differentiation, but cap it so filler never looks bright.
 
-  if (range < 0.05) {
-    return scores.map(() => 1.0);
-  }
-
-  return scores.map(s => {
-    const normalized = (s - min) / range;
-    // Map to 0.25-1.0: dimmed but readable at the bottom, full opacity at top
-    return 0.25 + normalized * 0.75;
+  return scores.map(rawScore => {
+    // Base opacity from absolute score
+    let opacity;
+    if (rawScore <= 0.2) {
+      opacity = 0.25;
+    } else if (rawScore <= 0.4) {
+      opacity = 0.25 + (rawScore - 0.2) / 0.2 * 0.20;  // 0.25-0.45
+    } else if (rawScore <= 0.6) {
+      opacity = 0.45 + (rawScore - 0.4) / 0.2 * 0.25;  // 0.45-0.70
+    } else if (rawScore <= 0.8) {
+      opacity = 0.70 + (rawScore - 0.6) / 0.2 * 0.20;  // 0.70-0.90
+    } else {
+      opacity = 0.90 + (rawScore - 0.8) / 0.2 * 0.10;  // 0.90-1.00
+    }
+    return opacity;
   });
 }
