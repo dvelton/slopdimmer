@@ -74,7 +74,7 @@ async function getFillerEmbeddings() {
 // Handle messages from content script
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // Don't handle messages meant for the offscreen document
-  if (msg.target === "offscreen") return;
+  if (msg.target === "offscreen") return false;
 
   if (msg.type === "embed") {
     embedViaOffscreen(msg.texts)

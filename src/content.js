@@ -265,7 +265,7 @@
     addDensityBadge(scores);
     window.__slopDimmerActive = true;
 
-    // Notify popup of completion
+    // Notify popup of completion (ignore errors if popup is closed)
     chrome.runtime.sendMessage({
       type: "analysis_complete",
       stats: {
@@ -274,9 +274,13 @@
         lowSignal: scores.filter((s) => s < 0.4).length,
         avgScore: scores.reduce((a, b) => a + b, 0) / scores.length,
       },
-    });
+    }, () => void chrome.runtime.lastError);
     } catch (err) {
       console.error("SlopDimmer: activation failed", err);
+      chrome.runtime.sendMessage({
+        type: "analysis_error",
+        error: err.message,
+      }, () => void chrome.runtime.lastError);
     } finally {
       _processing = false;
     }

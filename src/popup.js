@@ -135,4 +135,12 @@ chrome.runtime.onMessage.addListener((msg) => {
     toggleBtn.classList.add("active");
     toggleBtn.disabled = false;
   }
+
+  if (msg.type === "analysis_error") {
+    setStatus("Analysis failed", false);
+    isActive = false;
+    toggleBtn.textContent = "Dim the slop";
+    toggleBtn.classList.remove("active");
+    toggleBtn.disabled = false;
+  }
 });

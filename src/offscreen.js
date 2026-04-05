@@ -59,7 +59,7 @@ async function embed(texts) {
 }
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.target !== "offscreen") return;
+  if (msg.target !== "offscreen") return false;
 
   if (msg.type === "embed") {
     embed(msg.texts)
