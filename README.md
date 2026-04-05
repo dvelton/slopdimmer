@@ -2,6 +2,8 @@
 
 A Chrome extension that visually dims low-information filler text so you can focus on the sentences that actually say something. Runs entirely on your machine.
 
+![SlopDimmer analyzing a text-heavy page — filler paragraphs are dimmed, signal stays bright](screenshots/dimmed-page.png)
+
 ## What it does
 
 SlopDimmer analyzes text on any webpage, scores each paragraph for information density, and adjusts its visual opacity. High-signal content (concrete findings, action items, specific data, direct questions) stays at full brightness. Low-signal filler (preamble, hedging, stakes inflation, vacuous conclusions) gets dimmed.
@@ -17,6 +19,8 @@ You still see the full original text. Nothing is deleted, rewritten, or summariz
 5. Click **Load unpacked** and select the `dist/` folder
 
 Click the SlopDimmer icon on any page and hit **Dim the slop**.
+
+![SlopDimmer popup showing the button and privacy notice](screenshots/popup.png)
 
 ## How it works
 
