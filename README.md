@@ -1,6 +1,6 @@
 # SlopDimmer
 
-A Chrome extension that visually dims low-information filler text so you can focus on the sentences that actually say something. Runs entirely on your machine — your text never goes anywhere.
+A Chrome extension that visually dims low-information filler text so you can focus on the sentences that actually say something. Runs entirely on your machine.
 
 ## What it does
 
@@ -41,9 +41,9 @@ This is an experiment, not a polished product. Specific things to know:
 - **Page compatibility varies.** The extension extracts text from common page structures (GitHub issues, blog posts, articles). Unusual DOM structures may not get analyzed.
 - **"Signal-only" mode is aggressive.** It hides everything below the brightness threshold, which means you might miss context.
 
-## Privacy
+## Notes
 
-The extension makes zero network requests after installation. The ML model weights are bundled in the extension package. All text analysis happens locally via WebAssembly. No text, scores, or usage data ever leaves your machine. You could disconnect from the internet after installing and it would still work.
+The extension makes no network requests after installation. The ML model weights are bundled in the extension package. Text analysis happens locally.
 
 ## Technical details
 
