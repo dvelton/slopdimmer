@@ -12,11 +12,17 @@ You still see the full original text. Nothing is deleted, rewritten, or summariz
 
 ## How to install
 
-1. Download or clone this repo
-2. Run `npm install && npm run build`
+You'll need [Node.js](https://nodejs.org/) (v18 or later) installed.
+
+1. Clone or download this repo: `git clone https://github.com/dvelton/slopdimmer.git`
+2. Open a terminal in the project folder and run:
+   ```
+   npm install
+   npm run build
+   ```
 3. Open Chrome and go to `chrome://extensions/`
-4. Turn on **Developer mode** (top right)
-5. Click **Load unpacked** and select the `dist/` folder
+4. Turn on **Developer mode** (top right toggle)
+5. Click **Load unpacked** and select the `dist/` folder inside the project
 
 Click the SlopDimmer icon on any page and hit **Dim the slop**.
 
