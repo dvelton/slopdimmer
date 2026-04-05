@@ -73,7 +73,7 @@ const FILLER_PATTERNS = [
   /comprehensive approach/i,
   /robust token management/i,
   /maintaining the integrity of/i,
-  /not just a technical issue/i,
+  /\b(not|isn't|is not|wasn't|isn.t) just a technical\b/i,
   /speaks to a (deeper|larger|broader)/i,
   /with the utmost urgency/i,
 
@@ -204,7 +204,7 @@ const FILLER_PATTERNS = [
   // Negative parallelism ("It's not X — it's Y" pattern)
   // ═══════════════════════════════════════════════
   /^it('s| is) not .{1,20}[,—–-]\s*(it('s| is)|but)/i,
-  /^not a .{1,15}, not a .{1,15}, (but )?a /i,
+  /^not a .{1,15}[,.] not a .{1,15}[,.] (but )?a /i,
   /they could .{1,20}, they could .{1,20}, they could/i,
   
   // ═══════════════════════════════════════════════
@@ -583,7 +583,9 @@ function specificityScore(sentence) {
 
   // Contains specific technical terms
   if (/\b(null|undefined|NaN|segfault|mutex|race condition|deadlock|memory leak|stack overflow|root cause|index miss|missing index)\b/i.test(s)) score += 0.2;
-  if (/\b(404|500|401|403|200|301|302|TypeError|Error|Exception|bug|crash|CVE|RFC)\b/i.test(s)) score += 0.2;
+  if (/\b(404|500|401|403|200|301|302|TypeError|Error|Exception|crash|CVE|RFC)\b/i.test(s)) score += 0.2;
+  // "bug" only counts as signal when it's near a number, identifier, or technical context
+  if (/\bbug\s*#?\d+\b/i.test(s) || /\bbug\s+in\s+(the\s+)?\w+/i.test(s) || /\ba\s+bug\s+(with|where|when|that|causing)/i.test(s)) score += 0.2;
   if (/\b(JWT|OAuth|SSL|TLS|DNS|HTTP|HTTPS|API|REST|GraphQL|SQL|NoSQL|Redis|Postgres|Kafka|Chrome|Firefox|Safari|distutils|SSO)\b/i.test(s)) score += 0.15;
   if (/\b(curl|git|npm|pip|docker|kubectl|terraform|ansible)\b/i.test(s)) score += 0.2;
   if (/\b(token|endpoint|middleware|pipeline|migration|deploy|commit|merge|rebase|column|table|query)\b/i.test(s)) score += 0.1;
@@ -594,7 +596,9 @@ function specificityScore(sentence) {
   if (/\b(Chrome|Firefox|Safari|Edge)\s+\d+\b/i.test(s)) score += 0.15;
 
   // Contains quoted strings or command-line syntax
-  if (/"[^"]{3,}"/.test(s) || /'[^']{3,}'/.test(s)) score += 0.2;
+  // Quoted strings — but exclude apostrophes in contractions (It's, don't, isn't)
+  if (/"[^"]{3,}"/.test(s)) score += 0.2;
+  if (/(?<!\w)'[^']{3,}'(?!\w)/.test(s)) score += 0.2;
   if (/\$\{/.test(s) || /^(curl|git|npm|pip|docker)\s/i.test(s)) score += 0.3;
   if (/^(note|important|warning|error|fixed|fix|breaking change|deprecated):/i.test(s)) score += 0.2;
 
@@ -639,6 +643,9 @@ function isListItem(sentence) {
 }
 
 export function scoreSentences(sentences, sentenceEmbeddings, fillerEmbeddings, titleEmbedding) {
+  if (!sentences || !sentenceEmbeddings || sentences.length !== sentenceEmbeddings.length) {
+    throw new Error(`SlopDimmer: mismatched inputs (${sentences?.length} sentences, ${sentenceEmbeddings?.length} embeddings)`);
+  }
   const scores = [];
   const n = sentences.length;
 

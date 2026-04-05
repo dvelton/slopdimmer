@@ -1,8 +1,10 @@
 // Content script: extracts text, coordinates scoring, applies visual treatment.
 
 (function () {
-  if (window.__slopDimmerActive) return;
+  if (window.__slopDimmerInjected) return;
+  window.__slopDimmerInjected = true;
   window.__slopDimmerActive = false;
+  let _processing = false;
 
   const MIN_SENTENCES = 2;
   const MIN_SENTENCE_LENGTH = 15;
@@ -199,9 +201,13 @@
       deactivate();
       return;
     }
+    if (_processing) return;
+    _processing = true;
+
+    try {
 
     const blocks = findTextBlocks();
-    if (blocks.length === 0) return;
+    if (blocks.length === 0) { _processing = false; return; }
 
     // Collect all sentences across all blocks
     const blockData = [];
@@ -215,7 +221,7 @@
       allSentences.push(...sentences);
     }
 
-    if (allSentences.length === 0) return;
+    if (allSentences.length === 0) { _processing = false; return; }
 
     // Get page title
     const title = getPageTitle();
@@ -224,7 +230,7 @@
 
     // Request embeddings from background worker
     const embeddings = await requestEmbeddings(textsToEmbed);
-    if (!embeddings) return;
+    if (!embeddings) { _processing = false; return; }
 
     const sentenceEmbeddings = embeddings.slice(0, allSentences.length);
     const titleEmbedding = title ? embeddings[embeddings.length - 1] : null;
@@ -240,7 +246,7 @@
       titleEmbedding
     );
 
-    if (!scores) return;
+    if (!scores) { _processing = false; return; }
 
     // Apply visual treatment to each block
     for (const { element, sentences, startIdx } of blockData) {
@@ -261,6 +267,11 @@
         avgScore: scores.reduce((a, b) => a + b, 0) / scores.length,
       },
     });
+    } catch (err) {
+      console.error("SlopDimmer: activation failed", err);
+    } finally {
+      _processing = false;
+    }
   }
 
   // Communication with background service worker
@@ -322,8 +333,13 @@
   // Listen for messages from popup
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.type === "toggle") {
-      activate();
-      sendResponse({ active: window.__slopDimmerActive });
+      if (window.__slopDimmerActive) {
+        deactivate();
+        sendResponse({ active: false });
+      } else {
+        activate(); // async — completion is signaled via analysis_complete message
+        sendResponse({ active: "pending" });
+      }
     }
     if (msg.type === "set_mode") {
       if (msg.mode === "signal-only") {

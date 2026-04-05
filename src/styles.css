@@ -5,17 +5,31 @@
   transition: opacity 0.3s ease, background-color 0.3s ease;
 }
 
-/* Signal-only mode: hide low-signal sentences */
+/* Signal-only mode: hide low-signal content while preserving layout */
 .slopdimmer-signal-only [data-slopdimmer-score] {
-  display: none;
+  opacity: 0.03;
 }
 .slopdimmer-signal-only [data-slopdimmer-signal="high"] {
-  display: inline;
+  opacity: 1 !important;
 }
 
 /* Hover: temporarily reveal dimmed text at full opacity */
 [data-slopdimmer-score]:hover {
   opacity: 1 !important;
+  cursor: help;
+}
+
+/* Accessibility: respect user preferences */
+@media (prefers-contrast: more) {
+  [data-slopdimmer-score] {
+    opacity: 1 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slopdimmer-score] {
+    transition: none;
+  }
 }
 
 /* Processing indicator */

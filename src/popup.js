@@ -57,22 +57,32 @@ toggleBtn.addEventListener("click", async () => {
     await ensureContentScript(tab.id);
     const response = await chrome.tabs.sendMessage(tab.id, { type: "toggle" });
 
-    isActive = response?.active || false;
-    toggleBtn.disabled = false;
-
-    if (isActive) {
-      toggleBtn.textContent = "Turn off";
+    if (response?.active === "pending") {
+      // Activation started — wait for analysis_complete message
+      toggleBtn.textContent = "Analyzing...";
       toggleBtn.classList.add("active");
-      statusEl.textContent = "Analyzing...";
-    } else {
+      toggleBtn.disabled = true;
+      statusEl.textContent = "Loading model and analyzing...";
+    } else if (response?.active === false) {
+      // Deactivated
+      isActive = false;
       toggleBtn.textContent = "Dim the slop";
       toggleBtn.classList.remove("active");
+      toggleBtn.disabled = false;
       statsEl.classList.remove("visible");
       modesEl.classList.remove("visible");
       statusEl.textContent = "Click to dim the slop";
+    } else {
+      isActive = response?.active || false;
+      toggleBtn.disabled = false;
     }
   } catch (e) {
-    statusEl.textContent = "Error: " + e.message;
+    const msg = e.message || "";
+    if (msg.includes("chrome://") || msg.includes("Cannot access")) {
+      statusEl.textContent = "Can't analyze this page";
+    } else {
+      statusEl.textContent = "Error: " + msg;
+    }
     toggleBtn.disabled = false;
   }
 });
@@ -115,6 +125,9 @@ chrome.runtime.onMessage.addListener((msg) => {
     statsEl.classList.add("visible");
     modesEl.classList.add("visible");
     statusEl.textContent = "Active";
+    isActive = true;
+    toggleBtn.textContent = "Turn off";
+    toggleBtn.classList.add("active");
     toggleBtn.disabled = false;
   }
 });

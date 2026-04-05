@@ -6,29 +6,39 @@ import { FILLER_PHRASES } from "./filler.js";
 import { scoreSentences } from "./scorer.js";
 
 let offscreenReady = false;
-let fillerEmbeddingsCache = null;
+let offscreenCreating = null;
+let fillerEmbeddingsPromise = null;
 
 async function ensureOffscreen() {
   if (offscreenReady) return;
-  try {
-    // Check if already exists
-    const contexts = await chrome.runtime.getContexts({
-      contextTypes: ["OFFSCREEN_DOCUMENT"],
-    });
-    if (contexts.length > 0) {
-      offscreenReady = true;
-      return;
-    }
-  } catch (e) {
-    // getContexts may not be available in older Chrome — just try creating
-  }
+  if (offscreenCreating) return offscreenCreating;
 
-  await chrome.offscreen.createDocument({
-    url: "offscreen.html",
-    reasons: ["WORKERS"],
-    justification: "Run ML model inference for text analysis",
-  });
-  offscreenReady = true;
+  offscreenCreating = (async () => {
+    try {
+      const contexts = await chrome.runtime.getContexts({
+        contextTypes: ["OFFSCREEN_DOCUMENT"],
+      });
+      if (contexts.length > 0) {
+        offscreenReady = true;
+        return;
+      }
+    } catch (e) {
+      // getContexts may not be available in older Chrome
+    }
+
+    await chrome.offscreen.createDocument({
+      url: "offscreen.html",
+      reasons: ["WORKERS"],
+      justification: "Run ML model inference for text analysis",
+    });
+    offscreenReady = true;
+  })();
+
+  try {
+    await offscreenCreating;
+  } finally {
+    offscreenCreating = null;
+  }
 }
 
 async function embedViaOffscreen(texts) {
@@ -52,9 +62,13 @@ async function embedViaOffscreen(texts) {
 }
 
 async function getFillerEmbeddings() {
-  if (fillerEmbeddingsCache) return fillerEmbeddingsCache;
-  fillerEmbeddingsCache = await embedViaOffscreen(FILLER_PHRASES);
-  return fillerEmbeddingsCache;
+  if (!fillerEmbeddingsPromise) {
+    fillerEmbeddingsPromise = embedViaOffscreen(FILLER_PHRASES).catch((err) => {
+      fillerEmbeddingsPromise = null;
+      throw err;
+    });
+  }
+  return fillerEmbeddingsPromise;
 }
 
 // Handle messages from content script

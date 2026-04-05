@@ -1276,7 +1276,7 @@ totalPass += t64.pass; totalFail += t64.fail;
 // The adaptive damping formula lets high-specificity content override a single
 // filler opener.
 const t65 = runTest("Filler opener + high-specificity payload (UX edge case)", [
-  // Single filler word + very specific content — should score MID, not LOW
+  // Single filler word + very specific content — high specificity rescues filler opener
   "Importantly, the timeout is hardcoded to 5000ms in src/config/defaults.js",
   "It's worth noting that CVE-2024-1337 affects all versions before 3.2.5",
   "Essentially, the bottleneck is the N+1 query in the repository.findAll() call on line 89",
@@ -1285,9 +1285,9 @@ const t65 = runTest("Filler opener + high-specificity payload (UX edge case)", [
   "Notably, we should enhance our approach to ensure comprehensive coverage.",
   "Importantly, this is a critical issue that affects all users going forward.",
 ], [
-  "mid",   // file path + measurement rescue the filler opener
+  "high",  // file path + measurement rescue the filler opener
   "high",  // CVE + version + numbers = very high specificity
-  "mid",   // function call + line number
+  "high",  // function call + line number
   "high",  // file path with date + underscore vars
   "low",   // filler opener + zero specificity = still low
   "low",   // filler opener + filler content = still low
