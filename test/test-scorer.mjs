@@ -21,7 +21,7 @@ function runTest(name, sentences, expectedSignals, options = {}) {
 
   for (let i = 0; i < sentences.length; i++) {
     const expected = expectedSignals[i]; // "high", "mid", "low"
-    const actual = scores[i] >= 0.65 ? "high" : scores[i] >= 0.45 ? "mid" : "low";
+    const actual = scores[i] >= 0.55 ? "high" : scores[i] >= 0.35 ? "mid" : "low";
     
     const ok = expected === actual || (
       allowNearMisses &&

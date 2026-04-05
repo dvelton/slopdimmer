@@ -737,24 +737,24 @@ export function scoreSentences(sentences, sentenceEmbeddings, fillerEmbeddings) 
   //   - Strong signal (raw 0.8-1.0) is near-full brightness
   //
   // Raw score mapping:
-  //   0.0 - 0.2  → 0.22-0.35 (very dim)
-  //   0.2 - 0.4  → 0.35-0.52 (dim)
-  //   0.4 - 0.6  → 0.52-0.73 (readable mid)
-  //   0.6 - 0.8  → 0.73-0.91 (bright)
-  //   0.8 - 1.0  → 0.91-1.00 (full brightness)
+  //   0.0 - 0.2  → 0.15-0.25 (very dim — obvious filler)
+  //   0.2 - 0.4  → 0.25-0.40 (dim — likely filler)
+  //   0.4 - 0.6  → 0.40-0.65 (mid — neutral prose)
+  //   0.6 - 0.8  → 0.65-0.90 (bright — signal)
+  //   0.8 - 1.0  → 0.90-1.00 (full brightness — strong signal)
 
   return scores.map(rawScore => {
     let opacity;
     if (rawScore <= 0.2) {
-      opacity = 0.22 + (rawScore / 0.2) * 0.13;           // 0.22-0.35
+      opacity = 0.15 + (rawScore / 0.2) * 0.10;           // 0.15-0.25
     } else if (rawScore <= 0.4) {
-      opacity = 0.35 + ((rawScore - 0.2) / 0.2) * 0.17;   // 0.35-0.52
+      opacity = 0.25 + ((rawScore - 0.2) / 0.2) * 0.15;   // 0.25-0.40
     } else if (rawScore <= 0.6) {
-      opacity = 0.52 + ((rawScore - 0.4) / 0.2) * 0.21;   // 0.52-0.73
+      opacity = 0.40 + ((rawScore - 0.4) / 0.2) * 0.25;   // 0.40-0.65
     } else if (rawScore <= 0.8) {
-      opacity = 0.73 + ((rawScore - 0.6) / 0.2) * 0.18;   // 0.73-0.91
+      opacity = 0.65 + ((rawScore - 0.6) / 0.2) * 0.25;   // 0.65-0.90
     } else {
-      opacity = 0.91 + ((rawScore - 0.8) / 0.2) * 0.09;   // 0.91-1.00
+      opacity = 0.90 + ((rawScore - 0.8) / 0.2) * 0.10;   // 0.90-1.00
     }
     return opacity;
   });

@@ -119,7 +119,7 @@
       const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
       element.style.opacity = avgScore.toFixed(2);
       element.setAttribute("data-slopdimmer-score", avgScore.toFixed(2));
-      const signal = avgScore >= 0.65 ? "high" : avgScore >= 0.4 ? "mid" : "low";
+      const signal = avgScore >= 0.55 ? "high" : avgScore >= 0.35 ? "mid" : "low";
       element.setAttribute("data-slopdimmer-signal", signal);
       return;
     }
@@ -154,7 +154,7 @@
       const avgScore = childScores.reduce((a, b) => a + b, 0) / childScores.length;
       child.style.opacity = avgScore.toFixed(2);
       child.setAttribute("data-slopdimmer-score", avgScore.toFixed(2));
-      const signal = avgScore >= 0.65 ? "high" : avgScore >= 0.4 ? "mid" : "low";
+      const signal = avgScore >= 0.55 ? "high" : avgScore >= 0.35 ? "mid" : "low";
       child.setAttribute("data-slopdimmer-signal", signal);
     }
   }
@@ -166,7 +166,7 @@
 
     const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
     const signalPct = Math.round(
-      (scores.filter((s) => s >= 0.7).length / scores.length) * 100
+      (scores.filter((s) => s >= 0.55).length / scores.length) * 100
     );
 
     const heading = document.querySelector(
@@ -270,8 +270,8 @@
       type: "analysis_complete",
       stats: {
         totalSentences: allSentences.length,
-        highSignal: scores.filter((s) => s >= 0.7).length,
-        lowSignal: scores.filter((s) => s < 0.4).length,
+        highSignal: scores.filter((s) => s >= 0.55).length,
+        lowSignal: scores.filter((s) => s < 0.35).length,
         avgScore: scores.reduce((a, b) => a + b, 0) / scores.length,
       },
     }, () => void chrome.runtime.lastError);
