@@ -91,15 +91,17 @@ async function build() {
   })()`;
 
   // 4. Replace the dynamic import function with one that returns the inlined module.
-  //    The variable name may change across ONNX versions — the pattern matches the structure.
+  //    We capture the original variable name so the rest of the ONNX runtime can still call it.
   let patchedQp = false;
   const qpPatterns = [
-    /\w+ = async \(e\) => \(await import\(\s*\/\*webpackIgnore:true\*\/\s*e\s*\)\)\.default/,
-    /\w+ = async \(e\) => \{\s*try \{\s*const resp[\s\S]*?SlopDimmer: WASM loader[\s\S]*?\}/,
+    /(\w+) = async \(e\) => \(await import\(\s*\/\*webpackIgnore:true\*\/\s*e\s*\)\)\.default/,
+    /(\w+) = async \(e\) => \{\s*try \{\s*const resp[\s\S]*?SlopDimmer: WASM loader[\s\S]*?\}/,
   ];
   for (const pattern of qpPatterns) {
-    if (pattern.test(offscreenCode)) {
-      offscreenCode = offscreenCode.replace(pattern, `__slopdimmer_wasm_loader = async (e) => ${inlinedWasmInit}`);
+    const match = offscreenCode.match(pattern);
+    if (match) {
+      const varName = match[1];
+      offscreenCode = offscreenCode.replace(pattern, `${varName} = async (e) => ${inlinedWasmInit}`);
       patchedQp = true;
       break;
     }
