@@ -1,12 +1,12 @@
 # SlopDimmer
 
-A Chrome extension that visually dims low-information filler text so you can focus on the sentences that actually say something. Runs entirely on your machine.
+A Chrome extension that visually dims low-information filler text so you can focus on the sentences that say something. Runs entirely on your machine.
 
 ![SlopDimmer analyzing a text-heavy page — filler paragraphs are dimmed, signal stays bright](screenshots/dimmed-page.png)
 
 ## What it does
 
-SlopDimmer analyzes text on any webpage, scores each paragraph for information density, and adjusts its visual opacity. High-signal content (concrete findings, action items, specific data, direct questions) stays at full brightness. Low-signal filler (preamble, hedging, stakes inflation, vacuous conclusions, corporate boilerplate, chat noise) gets dimmed.
+SlopDimmer analyzes text on any webpage, scores each paragraph for information density, and adjusts its visual opacity. High-signal content (concrete findings, action items, specific data, direct questions) stays at full brightness. Low-signal filler (preamble, hedging, stakes inflation, vacuous conclusions, boilerplate, chat noise) gets dimmed.
 
 You still see the full original text. Nothing is deleted, rewritten, or summarized. The typography just makes the signal obvious.
 
@@ -32,7 +32,7 @@ Click the SlopDimmer icon on any page and hit **Dim the slop**.
 
 Each paragraph is split into sentences and scored using several signals:
 
-- **Pattern matching** against ~340 regex patterns covering preamble phrases, empty hedging, stakes inflation, vacuous conclusions, performative flattery, ChatGPT/Gemini-specific phrasing, corporate meeting-speak, marketing copy, PR review filler, Slack/Teams chat filler, documentation filler, hedging/weasel words, patronizing analogies, false profundity, and more. These patterns also match against ~260 filler phrase embeddings via cosine similarity, using a bundled sentence-transformer model (all-MiniLM-L6-v2).
+- **Pattern matching** against ~340 regex patterns covering preamble phrases, empty hedging, stakes inflation, vacuous conclusions, performative flattery, model-specific phrasing, meeting-speak, marketing copy, PR review filler, Slack/Teams chat filler, documentation filler, hedging words, patronizing analogies, false profundity, and more. These patterns also match against ~260 filler phrase embeddings via cosine similarity, using a bundled sentence-transformer model (all-MiniLM-L6-v2).
 - **Specificity detection** for concrete signals: file paths (including extensionless Unix paths like `/etc/nginx/`), URLs, code references, error codes, API endpoints, command-line syntax, environment variables, measurements with units (ms, GB, etc.), version numbers, issue/PR references, commit hashes, p50/p95/p99 latency markers, date/time references, location references, camelCase/snake_case identifiers, and legal/compliance terms (GDPR, SLA, SOC 2).
 - **Redundancy detection**: cosine similarity between neighboring sentence embeddings. Repetitive sentences that say the same thing as their neighbors get penalized.
 - **Non-prose classification**: code snippets, CLI commands, and SQL statements stay bright. Raw HTML/markup and noise (repeated words, merge markers) get dimmed. Prose is scored normally.
@@ -49,7 +49,7 @@ After scoring, each paragraph shows its opacity on a continuous gradient: confir
 
 A density badge appears near the page heading showing what percentage of the content scored as signal.
 
-The extension re-analyzes automatically when new content loads (SPA navigation, infinite scroll, dynamically injected comments). Contenteditable regions (Google Docs, Notion) are skipped.
+The extension re-analyzes automatically when new content loads (SPA navigation, infinite scroll, dynamically injected comments). Content-editable regions (Google Docs, Notion) are skipped.
 
 Accessibility: if your OS is set to prefer higher contrast, dimming is disabled entirely. If you prefer reduced motion, opacity transitions are turned off.
 
@@ -59,7 +59,7 @@ This is an experiment, not a polished product. Specific things to know:
 
 - **The scoring is heuristic, not magic.** The filler pattern matching works well for common AI-generated slop patterns. It will miss filler that doesn't match known patterns. It will occasionally dim something that matters or leave something bright that doesn't.
 - **It's tuned for English.** The filler patterns and the embedding model are English-only.
-- **Coverage is broad but pattern-based.** The pattern bank started with the kind of padding that LLMs produce and has expanded to cover PR review filler, Slack/Teams chat noise, corporate email boilerplate, meeting filler, marketing copy, and documentation throat-clearing. It's less effective on filler that doesn't match any of these categories.
+- **Coverage is broad but pattern-based.** The pattern bank started with the kind of padding that LLMs produce and has expanded to cover PR review filler, Slack/Teams chat noise, email boilerplate, meeting filler, marketing copy, and documentation throat-clearing. It's less effective on filler that doesn't match any of these categories.
 - **First activation is slow.** The ONNX model takes a few seconds to initialize on first use. After that, scoring is fast.
 - **The model is small.** all-MiniLM-L6-v2 is a 22M-parameter sentence transformer. Its embeddings are useful for redundancy and similarity detection but not strong enough for nuanced "does this sentence add information?" judgments. The pattern matching does most of the heavy lifting.
 - **Page compatibility varies.** The extension extracts text from common page structures (GitHub issues, blog posts, articles). Unusual DOM structures may not get analyzed.
