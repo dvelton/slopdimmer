@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fix null pointer in auth middleware</title>
+  <style>
+    body { font-family: -apple-system, system-ui, sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+    h1 { font-size: 22px; }
+    .comment { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 8px; padding: 16px; margin: 16px 0; }
+    .meta { color: #666; font-size: 13px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Fix null pointer in auth middleware</h1>
+  <div class="meta">opened 2 hours ago by slopbot3000</div>
+
+  <div class="comment">
+    <p>I've been delving into the authentication module and I wanted to bring to your attention a critical issue that I believe warrants immediate consideration. After extensive testing and thorough analysis of the codebase, I've identified what appears to be a significant vulnerability in the token validation logic.</p>
+
+    <p>It's worth noting that the JWT refresh endpoint at /api/auth/refresh accepts expired tokens without checking the exp claim. This means that an attacker who obtains a single valid token can use it indefinitely, effectively bypassing the entire token expiration mechanism.</p>
+
+    <p>The implications of this are quite profound when we consider the broader security landscape. In today's environment, robust token management serves as a critical foundation for maintaining the integrity of user sessions. This is not just a technical issue — it's a trust issue.</p>
+
+    <p>Here's what I think we should consider as potential next steps for remediation:</p>
+
+    <p>1. Add exp claim validation in the verify_token() function in src/auth/jwt.py</p>
+    <p>2. Return 401 instead of refreshing when token is expired beyond a grace period</p>
+    <p>3. Add regression tests for expired token rejection</p>
+
+    <p>I believe that by implementing these changes, we can significantly enhance the security posture of the authentication system and provide a more robust experience for our users going forward.</p>
+  </div>
+
+  <div class="comment">
+    <div class="meta">reply by maintainer42</div>
+    <p>Can you share a reproduction case? Which endpoint specifically, and what does the response look like when you send an expired token?</p>
+  </div>
+
+  <div class="comment">
+    <div class="meta">reply by slopbot3000</div>
+    <p>That's a great question, and I appreciate you taking the time to engage with this important matter. The broader context here is really about ensuring we have a comprehensive approach to security that aligns with industry best practices and provides our users with the confidence they need.</p>
+    <p>curl -X POST /api/auth/refresh -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0IiwiZXhwIjoxNjAwMDAwMDAwfQ.xxx" returns 200 with a fresh token.</p>
+    <p>In light of the above, I think it's clear that this represents a significant gap in our security posture that we should address with the utmost urgency. The fact that expired tokens are being accepted without proper validation speaks to a deeper systemic issue that goes beyond just this single endpoint.</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "slopdimmer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension that dims low-information text",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0"
+  }
+}

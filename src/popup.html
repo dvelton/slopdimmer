@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      width: 280px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      color: #24292f;
+      background: #fff;
+      padding: 16px;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .toggle-btn {
+      padding: 6px 14px;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      background: #f6f8fa;
+      color: #24292f;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .toggle-btn:hover { background: #eaeef2; }
+    .toggle-btn.active {
+      background: #0969da;
+      color: #fff;
+      border-color: #0969da;
+    }
+
+    .stats {
+      display: none;
+      padding: 12px;
+      background: #f6f8fa;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .stats.visible { display: block; }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .stat-row:last-child { margin-bottom: 0; }
+    .stat-label { color: #656d76; }
+    .stat-value { font-weight: 600; }
+    .stat-value.high { color: #1a7f37; }
+    .stat-value.mid { color: #bf8700; }
+    .stat-value.low { color: #cf222e; }
+
+    .density-bar {
+      height: 6px;
+      background: #eaeef2;
+      border-radius: 3px;
+      margin: 10px 0 4px;
+      overflow: hidden;
+    }
+    .density-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    .modes {
+      display: none;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .modes.visible { display: flex; }
+    .mode-btn {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      background: #fff;
+      color: #24292f;
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+    }
+    .mode-btn:hover { background: #f6f8fa; }
+    .mode-btn.selected {
+      background: #ddf4ff;
+      border-color: #54aeff;
+      color: #0969da;
+    }
+
+    .status {
+      color: #656d76;
+      font-size: 11px;
+      text-align: center;
+    }
+    .footer {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #d8dee4;
+      color: #656d76;
+      font-size: 11px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="title">SlopDimmer</span>
+    <button class="toggle-btn" id="toggleBtn">Dim the slop</button>
+  </div>
+
+  <div class="stats" id="stats">
+    <div class="stat-row">
+      <span class="stat-label">Sentences analyzed</span>
+      <span class="stat-value" id="totalSentences">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">High signal</span>
+      <span class="stat-value high" id="highSignal">—</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Low signal</span>
+      <span class="stat-value low" id="lowSignal">—</span>
+    </div>
+    <div class="density-bar">
+      <div class="density-fill" id="densityFill" style="width: 0%"></div>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Signal density</span>
+      <span class="stat-value" id="densityPct">—</span>
+    </div>
+  </div>
+
+  <div class="modes" id="modes">
+    <button class="mode-btn selected" data-mode="dimmer">Dimmer</button>
+    <button class="mode-btn" data-mode="signal-only">Signal only</button>
+  </div>
+
+  <div class="status" id="status">Click to dim the slop</div>
+  <div class="footer">100% local — nothing leaves your machine</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
