@@ -57,7 +57,7 @@ Accessibility: if your OS is set to prefer higher contrast, dimming is disabled 
 
 This is an experiment, not a polished product. Specific things to know:
 
-- **The scoring is heuristic, not magic.** The filler pattern matching works well for common AI-generated slop patterns. It will miss filler that doesn't match known patterns. It will occasionally dim something that matters or leave something bright that doesn't.
+- **The scoring is heuristic.** The filler pattern matching works well for common AI-generated slop patterns. It will miss filler that doesn't match known patterns. It will occasionally dim something that matters or leave something bright that doesn't.
 - **It's tuned for English.** The filler patterns and the embedding model are English-only.
 - **Coverage is broad but pattern-based.** The pattern bank started with the kind of padding that LLMs produce and has expanded to cover PR review filler, Slack/Teams chat noise, email boilerplate, meeting filler, marketing copy, documentation throat-clearing, LinkedIn thought leadership, conference-talk filler, promotional puffery, copula avoidance, significance/legacy inflation, social media rhetoric, corporate buzzwords, blog transitions, overattribution, and model-specific tics from ChatGPT, Claude, and Gemini. It's less effective on filler that doesn't match any of these categories.
 - **First activation is slow.** The ONNX model takes a few seconds to initialize on first use. After that, scoring is fast.
