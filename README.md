@@ -32,7 +32,7 @@ Click the SlopDimmer icon on any page and hit **Dim the slop**.
 
 Each paragraph is split into sentences and scored using several signals:
 
-- **Pattern matching** against ~340 regex patterns covering preamble phrases, empty hedging, stakes inflation, vacuous conclusions, performative flattery, model-specific phrasing, meeting-speak, marketing copy, PR review filler, Slack/Teams chat filler, documentation filler, hedging words, patronizing analogies, false profundity, and more. These patterns also match against ~260 filler phrase embeddings via cosine similarity, using a bundled sentence-transformer model (all-MiniLM-L6-v2).
+- **Pattern matching** against ~480 regex patterns covering preamble phrases, empty hedging, stakes inflation, vacuous conclusions, performative flattery, model-specific phrasing (ChatGPT, Claude, Gemini), meeting-speak, marketing copy, PR review filler, Slack/Teams chat filler, documentation filler, hedging words, patronizing analogies, false profundity, copula avoidance ("serves as" replacing "is"), significance/legacy inflation, promotional puffery, LinkedIn thought leadership, blog transition filler, social media rhetoric, corporate buzzwords, conference-talk filler, overattribution, temporal clichés, assertion dodges, and more. These patterns also match against ~455 filler phrase embeddings via cosine similarity, using a bundled sentence-transformer model (all-MiniLM-L6-v2).
 - **Specificity detection** for concrete signals: file paths (including extensionless Unix paths like `/etc/nginx/`), URLs, code references, error codes, API endpoints, command-line syntax, environment variables, measurements with units (ms, GB, etc.), version numbers, issue/PR references, commit hashes, p50/p95/p99 latency markers, date/time references, location references, camelCase/snake_case identifiers, and legal/compliance terms (GDPR, SLA, SOC 2).
 - **Redundancy detection**: cosine similarity between neighboring sentence embeddings. Repetitive sentences that say the same thing as their neighbors get penalized.
 - **Non-prose classification**: code snippets, CLI commands, and SQL statements stay bright. Raw HTML/markup and noise (repeated words, merge markers) get dimmed. Prose is scored normally.
@@ -59,7 +59,7 @@ This is an experiment, not a polished product. Specific things to know:
 
 - **The scoring is heuristic, not magic.** The filler pattern matching works well for common AI-generated slop patterns. It will miss filler that doesn't match known patterns. It will occasionally dim something that matters or leave something bright that doesn't.
 - **It's tuned for English.** The filler patterns and the embedding model are English-only.
-- **Coverage is broad but pattern-based.** The pattern bank started with the kind of padding that LLMs produce and has expanded to cover PR review filler, Slack/Teams chat noise, email boilerplate, meeting filler, marketing copy, and documentation throat-clearing. It's less effective on filler that doesn't match any of these categories.
+- **Coverage is broad but pattern-based.** The pattern bank started with the kind of padding that LLMs produce and has expanded to cover PR review filler, Slack/Teams chat noise, email boilerplate, meeting filler, marketing copy, documentation throat-clearing, LinkedIn thought leadership, conference-talk filler, promotional puffery, copula avoidance, significance/legacy inflation, social media rhetoric, corporate buzzwords, blog transitions, overattribution, and model-specific tics from ChatGPT, Claude, and Gemini. It's less effective on filler that doesn't match any of these categories.
 - **First activation is slow.** The ONNX model takes a few seconds to initialize on first use. After that, scoring is fast.
 - **The model is small.** all-MiniLM-L6-v2 is a 22M-parameter sentence transformer. Its embeddings are useful for redundancy and similarity detection but not strong enough for nuanced "does this sentence add information?" judgments. The pattern matching does most of the heavy lifting.
 - **Page compatibility varies.** The extension extracts text from common page structures (GitHub issues, blog posts, articles). Unusual DOM structures may not get analyzed.
@@ -74,7 +74,7 @@ The extension makes no network requests after installation. The ML model weights
 - Chrome Manifest V3
 - Sentence embeddings: Xenova/all-MiniLM-L6-v2 (Apache 2.0), quantized to int8 ONNX
 - Inference: ONNX Runtime Web (WASM backend) via @huggingface/transformers
-- Scoring: hybrid of ~340 regex filler patterns + ~260 filler phrase embeddings (cosine similarity) + specificity heuristics + redundancy detection + non-prose classification
+- Scoring: hybrid of ~480 regex filler patterns + ~455 filler phrase embeddings (cosine similarity) + specificity heuristics + redundancy detection + non-prose classification
 - Architecture: background service worker (message router) + offscreen document (ML inference) + content script (DOM manipulation)
 
 ## License

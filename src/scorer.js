@@ -489,6 +489,229 @@ const FILLER_PATTERNS = [
   /^conversely,$/i,
   /^subsequently,$/i,
   /^consequently,$/i,
+
+  // ═══════════════════════════════════════════════
+  // Copula avoidance ("serves as" replacing "is")
+  // ═══════════════════════════════════════════════
+  /(serves?|stands?) as (a |an )?(testament|reminder|symbol|beacon|bridge|cornerstone|hub|catalyst|pillar|foundation|example)\b/i,
+  /holds the distinction of being/i,
+  /boasts (a |an )?(wide|diverse|rich|impressive|extensive|array|range|variety)/i,
+  /marks? (a |an )?(significant|major|important|pivotal|crucial|key) (milestone|achievement|step|shift|departure|advancement)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // Significance / legacy / broader trends inflation
+  // ═══════════════════════════════════════════════
+  /(enduring|lasting|indelible) (legacy|mark|impact|influence|impression)\b/i,
+  /(deeply|firmly) rooted in\b/i,
+  /(pivotal|crucial|vital|instrumental) role in (shaping|defining|advancing|promoting|fostering|building)\b/i,
+  /underscores? (its|the|his|her|their) (importance|significance|relevance|commitment|role)\b/i,
+  /highlights? (its|the|his|her|their) (importance|significance|relevance|commitment|role)\b/i,
+  /reflects? (a |the )?(broader|larger|wider|growing) (trend|movement|shift|pattern|context)\b/i,
+  /contributing to (the|its|his|her|their)( \w+){0,2} (heritage|development|growth|prosperity|evolution|identity)\b/i,
+  /setting the stage for\b/i,
+  /shaping the (future|course|direction|trajectory) of\b/i,
+  /a testament to\b/i,
+  /focal point (of|for)\b/i,
+  /symboliz(e|es|ing) (its|the|his|her|their|a)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // Promotional / puffery vocabulary
+  // ═══════════════════════════════════════════════
+  /\bnestled (in|within|among|between|amid)\b/i,
+  /in the heart of\b/i,
+  /(vibrant|thriving) (community|culture|scene|ecosystem|hub|city|town|neighborhood)\b/i,
+  /diverse (array|range|collection|mix|tapestry) of\b/i,
+  /rich (tapestry|heritage|history|tradition|culture) of\b/i,
+  /groundbreaking (work|research|approach|achievement|discovery|innovation|study)\b/i,
+  /\brenowned for (its|his|her|their)\b/i,
+  /commitment to (excellence|quality|innovation|sustainability|diversity|inclusion)\b/i,
+  /showcas(e|es|ing) (the|its|his|her|their|a)\b/i,
+  /\bnatural beauty\b/i,
+  /captivat(e|es|ing) (both |)(audiences?|readers?|visitors?|residents?)\b/i,
+  /seamlessly (connect|integrat|blend|combin|bridg)/i,
+  /(world|best)-?(class|in-class)\b/i,
+  /holistic (approach|view|perspective|strategy|solution|framework)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // AI vocabulary density signals (research-backed overuse post-2022)
+  // ═══════════════════════════════════════════════
+  /\bdelve(s|d)? (into|deeper)\b/i,
+  /\bdelving (into|deeper)\b/i,
+  /foster(s|ed|ing) (a |an )?(sense|environment|culture|spirit|community|collaboration|innovation)\b/i,
+  /garnered? (significant|widespread|considerable|growing|increasing)\b/i,
+  /garnered? (attention|recognition|praise|support|acclaim|interest)\b/i,
+  /\bintricacies of\b/i,
+  /\binterplay (between|of|among)\b/i,
+  /meticulous(ly)? (crafted|designed|planned|documented|maintained|curated|organized)\b/i,
+  /bolster(s|ed|ing) (its|the|his|her|their)\b/i,
+  /encompass(es|ing) (a |an )?(wide|broad|diverse|comprehensive|vast|rich)\b/i,
+  /cultivat(e|es|ing) (a |an )?(sense|environment|culture|atmosphere|community|spirit)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // "The X? Y." — self-posed rhetorical fragment answers
+  // ═══════════════════════════════════════════════
+  /^the (result|worst part|best part|catch|upside|downside|answer|takeaway|problem|reality|truth|irony|twist|surprise|punchline|bottom line|kicker)\?\s/i,
+
+  // ═══════════════════════════════════════════════
+  // False vulnerability / performed self-awareness
+  // ═══════════════════════════════════════════════
+  /^and yes,?\s*(i|since|we|this|that)/i,
+  /^this is not a rant/i,
+  /^i('ll| will) be the first to admit/i,
+  /^look,?\s*i (get|know|understand) (it|that|this)/i,
+  /^full disclosure[,:]/i,
+
+  // ═══════════════════════════════════════════════
+  // Listicle in a trench coat
+  // ═══════════════════════════════════════════════
+  /^the (first|second|third|fourth|fifth) (thing|point|reason|issue|problem|consideration|takeaway|lesson|principle|pillar|wall|barrier) (is|was)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // "One thing is clear" / assertion dodges
+  // ═══════════════════════════════════════════════
+  /^one thing is (clear|certain|obvious|undeniable|for sure)\b/i,
+  /^make no mistake\b/i,
+  /^there('s| is) no (denying|question|doubt) (that|about|:)/i,
+  /should come as no surprise/i,
+  /^perhaps unsurprisingly/i,
+  /cannot be (stressed|emphasized) enough/i,
+  /a step in the right direction/i,
+  /the writing is on the wall/i,
+
+  // ═══════════════════════════════════════════════
+  // "At the intersection / crossroads / forefront"
+  // ═══════════════════════════════════════════════
+  /at the (intersection|crossroads|confluence|nexus) of\b/i,
+  /at the forefront of\b/i,
+  /(sits?|lies?|stands?) at the (center|heart|core|crossroads) of\b/i,
+  /at its core\b/i,
+
+  // ═══════════════════════════════════════════════
+  // Social media rhetoric
+  // ═══════════════════════════════════════════════
+  /^let that sink in\.?$/i,
+  /^read that again\.?$/i,
+  /^full stop\.?$/i,
+  /^say it louder/i,
+  /^this\.\s*so much this\.?$/i,
+  /^louder for the people in the back/i,
+
+  // ═══════════════════════════════════════════════
+  // LinkedIn / thought leadership filler
+  // ═══════════════════════════════════════════════
+  /^i('ve| have) spent (the last |over )?\d+ years (in|of|working|building|leading)/i,
+  /^after \d+ years (in |of |working )/i,
+  /^the (biggest|most important) (lesson|thing|takeaway) i('ve| have) learned/i,
+  /^(unpopular|hot|controversial|honest) (opinion|take|thought)[.:]/i,
+  /^a thread[.!]?$/i,
+  /agree or disagree\??$/i,
+  /^(thoughts|agree)\??$/i,
+  /^who else (has|feels|thinks|agrees|sees)/i,
+
+  // ═══════════════════════════════════════════════
+  // "To be clear" / assertive hedging
+  // ═══════════════════════════════════════════════
+  /^to be (very )?(clear|frank|honest|direct|blunt)[,:]\s/i,
+  /^i want to be (clear|upfront|transparent|candid|direct)[,:]\s/i,
+  /^let me be (very )?(clear|frank|honest|direct|blunt)[,:]\s/i,
+
+  // ═══════════════════════════════════════════════
+  // Blog / article transition filler
+  // ═══════════════════════════════════════════════
+  /^but (here's|that's) (the|where|what|why) (catch|thing|beauty|problem|rub|key|trick)/i,
+  /^but wait,?\s*there('s| is) more/i,
+  /^so,?\s*what('s| is) the (takeaway|bottom line|verdict|point|upshot)\b/i,
+  /^this (brings|leads|takes) us to\b/i,
+  /^which (brings|leads|takes) (us|me) to\b/i,
+  /^now,?\s*you (might|may) (be wondering|ask|think)\b/i,
+  /^if you('re| are) like (most|many) (people|developers|teams|engineers|folks)\b/i,
+  /^you (might|may) be (wondering|thinking|asking)\b/i,
+  /^(spoiler|plot twist|pro tip|hot take)[.:]\s/i,
+  /the (beauty|power|magic|genius|trick) of .{1,20} is (that|how)\b/i,
+  /what sets .{1,20} apart (is|from)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // Temporal clichés
+  // ═══════════════════════════════════════════════
+  /^only time will tell\b/i,
+  /remains to be seen\b/i,
+  /the jury is (still )?out\b/i,
+  /we('ll| will) (just )?have to wait and see/i,
+
+  // ═══════════════════════════════════════════════
+  // Conference / presentation filler
+  // ═══════════════════════════════════════════════
+  /^i('m| am) (so |really |very )?(excited|thrilled|honored|honoured|delighted|grateful) to (be here|present|speak|share|talk)/i,
+  /^thank you (so much |very much )?for (having|inviting) me\b/i,
+  /^without further ado\b/i,
+  /^(raise your hand|show of hands)/i,
+
+  // ═══════════════════════════════════════════════
+  // Overattribution patterns
+  // ═══════════════════════════════════════════════
+  /maintains? (a |an )?(strong|active|robust|significant|notable) (social media |online |digital |web )?presence\b/i,
+  /has been (widely )?(praised|hailed|celebrated|lauded|recognized|commended) (by|for)\b/i,
+  /^(critics|reviewers|commentators|analysts|observers) have (noted|praised|highlighted|pointed out|observed)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // Fractal summary / "as we've seen" callbacks
+  // ═══════════════════════════════════════════════
+  /^as (we've|we have) (seen|discussed|explored|examined|noted|covered)\b/i,
+  /^as (outlined|described|detailed) (above|earlier|previously)\b/i,
+  /^and so we return to\b/i,
+  /this brings us (back|full circle)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // Claude-era patterns (mid 2024-2026)
+  // ═══════════════════════════════════════════════
+  /^(that's|this is) a (fair|reasonable|valid|legitimate) (question|point|concern|observation)\b/i,
+  /^i('d| would) push back (a bit |slightly |gently )?(on|here)\b/i,
+  /^(a few|some|several|a couple of) (things|thoughts|observations|points|notes) (here|on this|worth)\b/i,
+  /^the (honest|direct|short|real|blunt|frank) answer is\b/i,
+  /^there('s| is) a (real|genuine|legitimate|valid) (tension|tradeoff|trade-off) (here|between)\b/i,
+  /^i('d| would) (frame|think about|approach) (this|it) (slightly |a bit )?differently\b/i,
+
+  // ═══════════════════════════════════════════════
+  // Corporate buzzword filler
+  // ═══════════════════════════════════════════════
+  /move the needle\b/i,
+  /low-?hanging fruit\b/i,
+  /\bnorth star\b/i,
+  /\bvalue proposition\b/i,
+  /\bsynerg(y|ies|ize)\b/i,
+  /lean(s|ed|ing)? into\b/i,
+  /double-?click(ed|ing)? on (that|this|it)\b/i,
+  /\bkey takeaway(s)?\b/i,
+  /\bdeep dive\b/i,
+  /take a step back\b/i,
+  /\bbig picture\b/i,
+  /\bthought leadership\b/i,
+  /elevate the (conversation|discourse|discussion|dialogue)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // Miscellaneous clichés used as AI filler
+  // ═══════════════════════════════════════════════
+  /\belephant in the room\b/i,
+  /\bdouble-?edged sword\b/i,
+  /\bmillion-?dollar question\b/i,
+  /begs the question\b/i,
+  /food for thought\b/i,
+  /for better (or|and) worse\b/i,
+  /without getting too technical\b/i,
+  /^on a related note\b/i,
+  /^that's the (real )?(question|issue|challenge|problem)\b/i,
+
+  // ═══════════════════════════════════════════════
+  // Meeting-speak extensions
+  // ═══════════════════════════════════════════════
+  /^(just )?to play devil('s)? advocate/i,
+  /^to (your|that) point\b/i,
+  /^building on (what|that)\b/i,
+  /^with all due respect\b/i,
+  /^i hear you,?\s*but\b/i,
+  /^i don('t| do not) disagree\b/i,
+  /^i('d| would) like to (echo|second|add to) (what|that)\b/i,
+  /^(let me |)(piggyback|build) on (that|what|this)\b/i,
 ];
 
 // Count how many filler patterns match in a sentence

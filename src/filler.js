@@ -367,4 +367,276 @@ export const FILLER_PHRASES = [
   "You can think of this as",
   "Imagine it as a",
   "It's kind of like when",
+
+  // ═══════════════════════════════════════════════
+  // Copula avoidance (embedding catches phrasing variants)
+  // ═══════════════════════════════════════════════
+  "serves as a testament to the enduring power of",
+  "stands as a reminder of what can be achieved",
+  "serves as a symbol of resilience and progress",
+  "functions as a bridge between tradition and modernity",
+  "acts as a catalyst for change in the community",
+  "serves as a cornerstone of the organization's mission",
+  "holds the distinction of being the first of its kind",
+  "represents a significant milestone in the field",
+  "marks a pivotal moment in the evolution of",
+
+  // ═══════════════════════════════════════════════
+  // Significance / legacy / broader trends
+  // ═══════════════════════════════════════════════
+  "its enduring legacy continues to shape the discourse",
+  "leaving an indelible mark on the field",
+  "deeply rooted in the traditions of the region",
+  "plays a pivotal role in shaping the future of",
+  "underscores the importance of continued investment",
+  "highlights the significance of collaborative efforts",
+  "reflects broader trends in the industry",
+  "contributing to the rich cultural heritage of the region",
+  "setting the stage for future developments in the space",
+  "shaping the future of the field for generations to come",
+  "a testament to the power of human ingenuity",
+  "at the forefront of innovation and progress",
+  "at the intersection of technology and society",
+  "occupies a unique position in the broader landscape",
+  "represents a turning point in the history of",
+
+  // ═══════════════════════════════════════════════
+  // Promotional / puffery language
+  // ═══════════════════════════════════════════════
+  "nestled in the heart of the historic district",
+  "a vibrant and thriving community with deep roots",
+  "a diverse array of experiences and opportunities",
+  "boasts a rich history and cultural heritage",
+  "renowned for its commitment to excellence and quality",
+  "showcasing the best of what the region has to offer",
+  "a dynamic and forward-thinking organization",
+  "world-class facilities and amenities for all visitors",
+  "best-in-class solutions for modern teams",
+  "a holistic approach to solving complex challenges",
+  "captivating audiences with its unique blend of styles",
+  "seamlessly blending tradition and innovation",
+  "the natural beauty of the surrounding landscape",
+  "an unparalleled experience unlike any other",
+  "a beacon of innovation and progress in the region",
+
+  // ═══════════════════════════════════════════════
+  // AI vocabulary phrases (embedding catches variants)
+  // ═══════════════════════════════════════════════
+  "delving into the intricacies of the problem",
+  "fostering a sense of community and belonging",
+  "garnered significant attention and widespread acclaim",
+  "the intricate interplay between form and function",
+  "meticulously crafted to ensure the highest quality",
+  "bolstering the organization's commitment to growth",
+  "underscoring the importance of cross-team collaboration",
+  "encompassing a wide range of diverse perspectives",
+  "cultivating an environment of trust and mutual respect",
+
+  // ═══════════════════════════════════════════════
+  // Invented concept labels
+  // ═══════════════════════════════════════════════
+  "the supervision paradox",
+  "the acceleration trap",
+  "the automation dilemma",
+  "the productivity vacuum",
+  "the oversight inversion",
+  "the scaling paradox",
+  "the complexity trap",
+  "workload creep",
+  "tool sprawl",
+  "the visibility deficit",
+
+  // ═══════════════════════════════════════════════
+  // LinkedIn / thought leadership
+  // ═══════════════════════════════════════════════
+  "I've spent the last decade working in this space",
+  "After years of building and shipping products",
+  "The biggest lesson I've learned in my career",
+  "The most underrated skill in tech is",
+  "Unpopular opinion: most companies don't need",
+  "Hot take: we're overthinking this",
+  "Here is what nobody tells you about leadership",
+  "Stop optimizing for the wrong metrics",
+  "Your company doesn't have a tech problem it has a people problem",
+  "Most leaders get this wrong",
+  "The secret to high-performing teams is simpler than you think",
+  "I used to think that too then I learned",
+
+  // ═══════════════════════════════════════════════
+  // Claude-era AI patterns (mid 2024-2026)
+  // ═══════════════════════════════════════════════
+  "That's a fair question",
+  "That's a reasonable concern",
+  "I'd push back a bit on that framing",
+  "A few things worth noting here",
+  "The honest answer is that it depends",
+  "There's a real tension between these two goals",
+  "I'd frame this slightly differently",
+  "The short answer is yes but with caveats",
+  "I think the more interesting question is",
+  "This is worth unpacking a bit",
+  "To be direct about this",
+  "I want to be careful about overstating this",
+  "There's a version of this argument that's compelling",
+  "The steel man version of that argument",
+
+  // ═══════════════════════════════════════════════
+  // Blog / article transition filler
+  // ═══════════════════════════════════════════════
+  "But here's the catch",
+  "But here's the thing no one talks about",
+  "But wait there's more",
+  "So what's the takeaway here",
+  "So what's the bottom line",
+  "This brings us to the real question",
+  "Which brings us to an important point",
+  "Now you might be wondering why this matters",
+  "If you're like most developers you've probably experienced this",
+  "You might be thinking this doesn't apply to you",
+  "Spoiler: it's not what you think",
+  "Plot twist: the real problem was something else entirely",
+  "Pro tip: always check the logs first",
+  "The beauty of this approach is that it scales naturally",
+  "What sets this apart from other solutions is",
+
+  // ═══════════════════════════════════════════════
+  // False vulnerability / performed honesty
+  // ═══════════════════════════════════════════════
+  "And yes I'm aware of the irony",
+  "And yes since we're being honest about it",
+  "This is not a rant it's a diagnosis",
+  "Full disclosure: I have skin in this game",
+  "I'll be the first to admit this isn't perfect",
+  "Look I get it change is hard",
+
+  // ═══════════════════════════════════════════════
+  // Corporate buzzwords (embedding catches variants)
+  // ═══════════════════════════════════════════════
+  "move the needle on key metrics",
+  "focus on the low-hanging fruit first",
+  "our north star metric for this quarter",
+  "the value proposition is clear",
+  "leverage synergies across teams",
+  "lean into our core strengths",
+  "let's double-click on that for a moment",
+  "the key takeaway from this discussion",
+  "we need a deep dive into the data",
+  "let's take a step back and look at the big picture",
+  "this is a thought leadership opportunity",
+  "we need to elevate the conversation",
+  "surface insights from the data",
+  "rally the team around this initiative",
+  "build consensus across stakeholders",
+
+  // ═══════════════════════════════════════════════
+  // Conference / presentation filler
+  // ═══════════════════════════════════════════════
+  "I'm thrilled to be here today to talk about",
+  "Thank you so much for having me",
+  "Without further ado let's get started",
+  "Raise your hand if you've ever experienced this",
+  "How many of you have dealt with this before",
+  "As I was saying before the break",
+
+  // ═══════════════════════════════════════════════
+  // Overattribution phrases
+  // ═══════════════════════════════════════════════
+  "has been widely praised by critics and audiences alike",
+  "maintains an active social media presence across platforms",
+  "has been recognized by industry leaders for",
+  "profiled in major publications including",
+  "featured in leading industry outlets",
+  "observers have cited this as a turning point",
+  "critics have lauded the innovative approach",
+
+  // ═══════════════════════════════════════════════
+  // Temporal clichés
+  // ═══════════════════════════════════════════════
+  "Only time will tell if this approach succeeds",
+  "It remains to be seen whether this will work",
+  "The jury is still out on this one",
+  "We'll just have to wait and see how this plays out",
+
+  // ═══════════════════════════════════════════════
+  // Social media rhetoric (embedding catches variants)
+  // ═══════════════════════════════════════════════
+  "Let that sink in for a moment",
+  "Read that again and let it sink in",
+  "Say it louder for the people in the back",
+  "This so much this",
+  "Agree or disagree",
+  "Who else feels this way",
+
+  // ═══════════════════════════════════════════════
+  // Assertion dodges
+  // ═══════════════════════════════════════════════
+  "One thing is clear about all of this",
+  "One thing is certain in this debate",
+  "Make no mistake about it",
+  "There's no denying that this matters",
+  "It should come as no surprise that",
+  "The writing is on the wall",
+  "This cannot be stressed enough",
+  "A step in the right direction for the team",
+
+  // ═══════════════════════════════════════════════
+  // Miscellaneous clichés used as AI filler
+  // ═══════════════════════════════════════════════
+  "the elephant in the room that nobody wants to address",
+  "a double-edged sword that cuts both ways",
+  "the million-dollar question everyone is asking",
+  "it begs the question of whether we should",
+  "food for thought for the entire team",
+  "for better or worse this is where we are",
+  "without getting too technical the basic idea is",
+  "on a related note it's worth considering",
+  "at its core this is really about trust",
+  "at the end of the day it all comes down to execution",
+  "the bottom line is that we need to act",
+
+  // ═══════════════════════════════════════════════
+  // Meeting-speak extensions
+  // ═══════════════════════════════════════════════
+  "Just to play devil's advocate here for a moment",
+  "To your point about the timeline",
+  "Building on what you just said",
+  "With all due respect to the previous speaker",
+  "I hear you but I think we need to consider the alternatives",
+  "I don't disagree with the overall direction",
+  "Let me piggyback on that thought",
+  "I'd like to echo what was said earlier",
+  "I'd like to add to what was just mentioned",
+
+  // ═══════════════════════════════════════════════
+  // README / documentation marketing
+  // ═══════════════════════════════════════════════
+  "A powerful and flexible framework for building modern applications",
+  "Simple yet powerful tools for every developer",
+  "Lightweight and blazing fast",
+  "Battle-tested in production environments",
+  "Batteries included with sensible defaults",
+  "Zero configuration required to get started",
+  "Blazing fast performance out of the box",
+  "Get up and running in minutes not hours",
+  "Everything you need to build modern applications",
+  "Production-ready from day one",
+
+  // ═══════════════════════════════════════════════
+  // "Despite challenges" extensions
+  // ═══════════════════════════════════════════════
+  "Despite its challenges the initiative continues to thrive",
+  "Despite these obstacles significant progress has been made",
+  "While not without its difficulties the project shows promise",
+  "Although challenges remain the outlook is positive",
+  "Despite facing headwinds the team has delivered results",
+
+  // ═══════════════════════════════════════════════
+  // Fractal summary / callback phrases
+  // ═══════════════════════════════════════════════
+  "As we've seen throughout this discussion",
+  "As outlined in the previous section",
+  "And so we return to where we began",
+  "This brings us full circle to the original question",
+  "Pulling all of this together",
+  "Tying it all together into a cohesive picture",
 ];
